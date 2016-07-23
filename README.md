@@ -1,5 +1,7 @@
 # osmsplitdup.sh
-Split nodes in a osm file that are near a node in another osm file
+Split nodes in a osm file that are near a node in another osm file.
+
+The intended use is to filter duplicated nodes before doing an import.
 
 Two files are created:
 file-to-remove-duplicates-dup.osm
