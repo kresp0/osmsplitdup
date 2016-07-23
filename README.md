@@ -1,5 +1,5 @@
 # osmsplitdup.sh
-Split nodes in a osm file that are near a node in another osm file
+Split nodes in a osm file that are near a node in another osm file, in a very inneficient way
 
 Two files are created:
 file-to-remove-duplicates-dup.osm
@@ -8,5 +8,5 @@ file-to-remove-duplicates-not_dup.osm
 
 You have to edit the TAGS and MAX_DISTANCE variables
 
-Usage: ./osmboxes.sh file-with-OSM-data.osm file-to-remove-duplicates.osm
+Usage: ./osmsplitdup.sh file-with-OSM-data.osm file-to-remove-duplicates.osm
 
