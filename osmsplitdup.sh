@@ -7,13 +7,9 @@
 # file-to-remove-duplicates-not_dup.osm
 
 # Tags to add to each node
-TAGS="    <tag k='amenity' v='drinking_water' />
-    <tag k='operator' v='Ayuntamiento de Madrid' />
-    <tag k='source' v='Ayuntamiento de Madrid' />
-    <tag k='source:date' v='2016-06-29' />"
-
+TAGS="<tag k='amenity' v='bicycle_parking' />"
 # Max. distance to consider a duplicate in meters
-MAX_DISTANCE=20
+MAX_DISTANCE=25
 
 TMPDIR=/tmp/osmsplitdup
 BASENAME=`echo $2 | awk -F '.' '{print $1}'`
@@ -28,6 +24,9 @@ fi
 
 rm -rf $TMPDIR
 mkdir -p $TMPDIR
+
+# To use a RAM disk
+#sudo mount -t tmpfs -o size=1G osmsplitdup-ramdisk $TMPDIR
 
 function addNode {                   
    echo "
@@ -69,7 +68,8 @@ function getDistance {
 	DISTANCE=$(acos "$DISTANCE")
 	DISTANCE=$(bc -l <<< "$DISTANCE * $EARTH_RADIUS")
 	DISTANCE=$(bc <<<"$DISTANCE * 1000")
-        DISTANCE=$(printf %.3f $DISTANCE)
+#    DISTANCE=$(printf "%.3f" $DISTANCE)
+	DISTANCE=`echo "scale=3;$DISTANCE/1" | bc`
 	echo $DISTANCE
 }
 
@@ -96,9 +96,9 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
    DUP=0
    echo "Testing $LAT_SPLIT $LON_SPLIT"
 
-   while IFS='' read -r line || [[ -n "$line" ]]; do
-      LAT_NODE=`echo "$line" | awk -F ";"  '{print $1}'`
-      LON_NODE=`echo "$line" | awk -F ";"  '{print $2}'`
+   while IFS='' read -r line2 || [[ -n "$line2" ]]; do
+      LAT_NODE=`echo "$line2" | awk -F ";"  '{print $1}'`
+      LON_NODE=`echo "$line2" | awk -F ";"  '{print $2}'`
       DISTANCE_NODE=`getDistance $LAT_SPLIT $LON_SPLIT $LAT_NODE $LON_NODE`
       DISTANCE_IS_LESS_THAN_MAX=`echo $DISTANCE_NODE'<'$MAX_DISTANCE | bc -l`
       
@@ -106,7 +106,7 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
          addNode $COUNT $LAT_SPLIT $LON_SPLIT $BASENAME-dup.osm
 	     echo "DUP: $COUNT $LAT_SPLIT $LON_SPLIT is $DISTANCE_NODE meters away from $LAT_NODE $LON_NODE"
          let COUNTDUP=COUNTDUP+1
-         grep -v $LAT_NODE $TMPDIR/to-compare > /tmp/foo ; mv /tmp/foo $TMPDIR/to-compare
+#         grep -v "$LAT_NODE;$LON_NODE" $TMPDIR/to-compare > /tmp/foo ; mv /tmp/foo $TMPDIR/to-compare # Puede haber varios to-split cerca de un to-compare
          DUP=1
          break
       fi
